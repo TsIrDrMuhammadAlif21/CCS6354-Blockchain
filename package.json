@@ -1,30 +1,19 @@
 {
   "name": "ccs6354-blockchain",
   "version": "1.0.0",
-  "description": "This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a Hardhat Ignition module that deploys that contract.",
+  "description": "Final Year Project",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npx hardhat test",
+    "compile": "npx hardhat compile",
+    "node": "npx hardhat node"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/TsIrDrMuhammadAlif21/CCS6354-Blockchain.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/TsIrDrMuhammadAlif21/CCS6354-Blockchain/issues"
-  },
-  "homepage": "https://github.com/TsIrDrMuhammadAlif21/CCS6354-Blockchain#readme",
   "devDependencies": {
-    "@nomicfoundation/hardhat-toolbox": "^7.0.0",
-    "@openzeppelin/contracts": "^5.6.1",
-    "dotenv": "^17.4.2",
-    "hardhat": "^3.9.0",
-    "hardhat-gas-reporter": "^2.3.0"
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.14"
   },
-  "directories": {
-    "test": "test"
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0",
+    "dotenv": "^16.4.5"
   }
 }
