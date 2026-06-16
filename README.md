@@ -1,45 +1,38 @@
-CrowdFunding Blockchain Project
-This project uses Hardhat v2 and OpenZeppelin v5 for secure, decentralized crowdfunding operations.
+# Decentralized Crowdfunding Platform
 
-Prerequisites
-Ensure you have Node.js (LTS version) installed on your machine.
+This project is a full-stack Web3 application demonstrating decentralized fundraising using Solidity, Hardhat, Ethers.js, and React. It features role-based access control (Creator vs. Backer), time-locked smart contracts, and real-time state synchronization via a local EVM.
 
-Getting Started
-Follow these steps to set up the project on your local machine:
+## System Architecture
+* **Smart Contract Engine:** Solidity & Hardhat
+* **Frontend Interface:** React.js (Vite) & Tailwind CSS/Standard CSS
+* **Web3 Bridge:** Ethers.js (v6)
+* **Wallet Provider:** MetaMask
 
-1. Clone the Repository
+---
 
-git clone https://github.com/TsIrDrMuhammadAlif21/CCS6354-Blockchain
-cd CCS6354-Blockchain
+## Standard Operating Procedure (Local Setup)
 
-2. Install Dependencies
-This project uses a clean dependency tree. Run the following command to install all necessary packages:
+To run this full-stack application locally, you must operate three separate terminals simultaneously.
 
-npm install
+### Terminal : Boot the Local Blockchain
+Start the local Hardhat node to simulate the Ethereum network:
+```bash
 
-3. Environment Configuration
-Create a .env file in the root directory. You can use the following template to store your environment variables:
-
-PRIVATE_KEY=your_private_key_here
-RPC_URL=your_rpc_url_here
-
-4. Running the Project
-The following commands are available for your workflow:
-
-Compile the Contracts:
-
-npx hardhat compile
 npx hardhat test
 
+npx hardhat node
 
-Technical Architecture
-Engine: Hardhat v2.22.14
+npx hardhat run scripts/deploy.js --network localhost
 
-Compiler: Solidity 0.8.20
+cd frontend
+npm run dev
 
-Standard: CommonJS (No ESM strict-mode)
+Time_Travel
 
-Security: OpenZeppelin v5 (ReentrancyGuard, AccessControl)
+npx hardhat console --network localhost
 
-Troubleshooting
-If you encounter Cannot read properties of undefined errors, ensure you are running npm install after pulling the latest changes from the repository. This guarantees that your node_modules are synchronized with the package.json lockfile.
+await network.provider.send("evm_increaseTime", [8 * 24 * 60 * 60])
+
+await network.provider.send("evm_mine")
+
+.exit
