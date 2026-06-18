@@ -211,7 +211,7 @@ function App() {
 
     try {
       const amountInWei = ethers.parseEther(fundAmount);
-      const tx = await contract.fund({ value: amountInWei });
+      const tx = await contract.fund("Testing the Phase 5 Deployment!", { value: amountInWei });
       
       alert("Transaction sent! Waiting for confirmation...");
       await tx.wait(); // Wait for block verification
@@ -220,15 +220,15 @@ function App() {
       fetchCampaignData(contract); // Refresh the UI data
       setFundAmount(""); // Clear the input box
     } catch (error) {
-      console.error("Funding failed:", error);
-      alert("Error: Check console or ensure deadline hasn't passed.");
+      console.error("ACTUAL ERROR:", error); 
+      alert("Transaction failed. Check the F12 Console for details.");
     }
   };
 
   const handleWithdraw = async () => {
     if (!contract) return;
     try {
-      const tx = await contract.withdrawFunds();
+      const tx = await contract.withdraw();
       await tx.wait();
       alert("Withdrawal successful!");
       fetchCampaignData(contract);

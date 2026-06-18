@@ -1,80 +1,97 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
+pragma solidity ^0.8.24;
 
-/**
- * @title Decentralized Crowdfunding
- * @dev Implements a secure, target-based crowdfunding campaign with RBAC.
- */
-contract CrowdFunding is ReentrancyGuard, AccessControl {
-    bytes32 public constant CREATOR_ROLE = keccak256("CREATOR_ROLE");
+/// @title Decentralized Crowdfunding Platform
+/// @notice A time-locked, secure crowdfunding vault for Final Year Project demonstration
+/// @dev Implements RBAC, Reentrancy Guards, and CEI patterns.
+contract CrowdFunding {
 
-    uint256 public immutable fundingGoal;
-    uint256 public deadline;
+    // --- GAS OPTIMIZATION: Custom Errors ---
+    // Using custom errors instead of require("string") saves significant gas during deployment and execution.
+    error Unauthorized();
+    error GoalNotReached();
+    error DeadlineNotPassed();
+    error DeadlinePassed();
+    error TransferFailed();
+    error InvalidAmount();
+
+    // --- STATE VARIABLES ---
+    // GAS OPTIMIZATION: 'immutable' variables are embedded directly into the contract bytecode, saving storage gas.
+    address public immutable creator;
+    uint256 public immutable goal;
+    uint256 public immutable deadline;
+
     uint256 public totalFunds;
-    bool public goalReached;
-    bool public isFinalized;
-
     mapping(address => uint256) public contributions;
 
-    event Funded(address indexed contributor, uint256 amount, uint256 currentTotal);
-    event GoalReached(uint256 finalTotal);
+    // SECURITY: Custom Reentrancy Guard State Variables
+    uint256 private constant _NOT_ENTERED = 1;
+    uint256 private constant _ENTERED = 2;
+    uint256 private _status;
+
+    // --- EVENTS ---
+    event Funded(address indexed backer, uint256 amount, string message);
     event FundsWithdrawn(address indexed creator, uint256 amount);
-    event RefundIssued(address indexed contributor, uint256 amount);
 
-    constructor(uint256 _fundingGoalInWei, uint256 _durationInDays, address _creator) {
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(CREATOR_ROLE, _creator);
+    // --- SECURITY MODIFIERS ---
 
-        fundingGoal = _fundingGoalInWei;
-        deadline = block.timestamp + (_durationInDays * 1 days);
+    // SECURITY: Role-Based Access Control (RBAC)
+    modifier onlyCreator() {
+        if (msg.sender != creator) revert Unauthorized();
+        _;
     }
 
-    function fund() external payable {
-        require(block.timestamp < deadline, "Error: Campaign deadline has passed");
-        require(msg.value > 0, "Contribution must be greater than zero");
-        
+    // SECURITY: Reentrancy Guard Modifier
+    // Prevents malicious contracts from repeatedly calling withdraw() before the state updates.
+    modifier nonReentrant() {
+        require(_status != _ENTERED, "ReentrancyGuard: reentrant call");
+        _status = _ENTERED;
+        _;
+        _status = _NOT_ENTERED;
+    }
+
+    /// @notice Initializes the crowdfunding campaign
+    /// @param _goal The funding goal in wei
+    /// @param _durationInDays How long the campaign lasts
+    constructor(uint256 _goal, uint256 _durationInDays) {
+        creator = msg.sender;
+        goal = _goal;
+        deadline = block.timestamp + (_durationInDays * 1 days);
+        _status = _NOT_ENTERED; // Initialize reentrancy guard
+    }
+
+    /// @notice Allows users to fund the campaign
+    /// @param _message A support message. 
+    /// GAS OPTIMIZATION: 'calldata' is used instead of 'memory' for external string inputs to save gas.
+    function fund(string calldata _message) external payable {
+        if (block.timestamp >= deadline) revert DeadlinePassed();
+        if (msg.value == 0) revert InvalidAmount();
+
         contributions[msg.sender] += msg.value;
         totalFunds += msg.value;
-        
-        emit Funded(msg.sender, msg.value, totalFunds);
-        
-        if (totalFunds >= fundingGoal && !goalReached) {
-            goalReached = true;
-            emit GoalReached(totalFunds);
-        }
+
+        emit Funded(msg.sender, msg.value, _message);
     }
 
-    function withdrawFunds() external onlyRole(CREATOR_ROLE) nonReentrant {
-        require(block.timestamp >= deadline, "Error: Campaign is active");
-        require(goalReached, "Cannot withdraw: Goal not reached");
-        require(!isFinalized, "Cannot withdraw: Already finalized");
+    /// @notice Allows the creator to withdraw funds after the deadline if the goal is met
+    // SECURITY: RBAC (onlyCreator) and ReentrancyGuard (nonReentrant) applied here.
+    function withdraw() external onlyCreator nonReentrant {
         
-        isFinalized = true;
-        uint256 amountToTransfer = totalFunds;
-        
+        // SECURITY: Checks-Effects-Interactions (CEI) Pattern Implementation
+
+        // 1. CHECKS (Verify conditions)
+        if (block.timestamp < deadline) revert DeadlineNotPassed();
+        if (totalFunds < goal) revert GoalNotReached();
+
+        // 2. EFFECTS (Update state BEFORE sending money)
+        uint256 amountToWithdraw = totalFunds;
         totalFunds = 0; 
-        
-        (bool success, ) = msg.sender.call{value: amountToTransfer}("");
-        require(success, "Transfer failed");
-        
-        emit FundsWithdrawn(msg.sender, amountToTransfer);
-    }
 
-    function claimRefund() external nonReentrant {
-        require(block.timestamp >= deadline, "Error: Campaign is active");
-        require(!goalReached, "Refund unavailable: Goal was reached");
-        
-        uint256 contributedAmount = contributions[msg.sender];
-        require(contributedAmount > 0, "Error: No contributions found");
-        
-        contributions[msg.sender] = 0; 
-        
-        (bool success, ) = msg.sender.call{value: contributedAmount}("");
-        require(success, "Refund transfer failed");
-        
-        emit RefundIssued(msg.sender, contributedAmount);
+        // 3. INTERACTIONS (Send the ether)
+        (bool success, ) = payable(creator).call{value: amountToWithdraw}("");
+        if (!success) revert TransferFailed();
+
+        emit FundsWithdrawn(creator, amountToWithdraw);
     }
 }
