@@ -1,0 +1,155 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
+}
+
+body {
+  background: #f4f7fc;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 30px;
+}
+
+.header {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: white;
+  padding: 40px;
+  border-radius: 20px;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.header h1 {
+  font-size: 2.5rem;
+}
+
+.wallet-card {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 25px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+}
+
+.wallet-address {
+  color: #4f46e5;
+  font-weight: bold;
+  word-break: break-all;
+}
+
+.dashboard {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 25px;
+}
+
+.main-card h2 {
+  color: #1f2937;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.side-card h3 {
+  color: #1f2937;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 20px;
+  background: #e5e7eb;
+  border-radius: 20px;
+  overflow: hidden;
+  margin: 20px 0;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg,#22c55e,#16a34a);
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 0;
+}
+
+.donate-section {
+  margin-top: 25px;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  margin-bottom: 15px;
+}
+
+button {
+  width: 100%;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  color: white;
+  font-weight: 600;
+  transition: .3s;
+}
+
+.connect-btn {
+  background: #4f46e5;
+}
+
+.connect-btn:hover {
+  background: #4338ca;
+}
+
+.donate-btn {
+  background: #16a34a;
+}
+
+.donate-btn:hover {
+  background: #15803d;
+}
+
+.withdraw-btn {
+  background: #f59e0b;
+}
+
+.withdraw-btn:hover {
+  background: #d97706;
+}
+
+.refund-btn {
+  background: #ef4444;
+}
+
+.refund-btn:hover {
+  background: #dc2626;
+}
+
+.status-box {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 10px;
+  background: #eef2ff;
+  color: #3730a3;
+}
+
+@media(max-width: 768px){
+  .dashboard{
+    grid-template-columns:1fr;
+  }
+}
